@@ -1,6 +1,6 @@
-import { forkPty } from './addon.js'
-import { ReadStream } from 'tty'
-import { performance } from 'perf_hooks'
+const { forkPty } = require('./addon.js')
+const { ReadStream } = require('tty')
+const { performance } = require('perf_hooks')
 
 for (let i = 0; i < 5; i++) {
   const s = performance.now()

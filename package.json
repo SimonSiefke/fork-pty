@@ -4,12 +4,11 @@
   "description": "forkpty",
   "main": "addon.js",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "benchmark": "node addon.benchmark.js",
-    "build": "cd build && make"
+    "build": "cd build && make",
+    "test": "jest",
+    "benchmark": "node forkPty.benchmark.js"
   },
   "gypfile": true,
-  "type": "module",
   "dependencies": {
     "bindings": "^1.5.0"
   },

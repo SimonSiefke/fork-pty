@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "target_name": "addon",
-      "sources": [ "addon.cc" ],
+      "target_name": "forkPty",
+      "sources": [ "forkPty.cc" ],
        'libraries': [
           '-lutil'
       ],

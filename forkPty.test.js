@@ -1,4 +1,4 @@
-import { forkPty } from './addon.js'
+const { forkPty } = require('./forkPty.js')
 
 test('forkPty', () => {
   const fileDescriptor = forkPty()
