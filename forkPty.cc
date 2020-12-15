@@ -1,6 +1,18 @@
 #include <node_api.h>
-#include <pty.h>
 #include <unistd.h>
+
+/* forkpty import is different dependeding on platform */
+/* http://www.gnu.org/software/gnulib/manual/html_node/forkpty.html */
+#if defined(__GLIBC__) || defined(__CYGWIN__)
+#include <pty.h>
+#elif defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <util.h>
+#elif defined(__FreeBSD__)
+#include <libutil.h>
+#else
+#include <pty.h>
+#endif
+
 
 int do_forkpty(napi_env &env) {
   int master;

@@ -1,4 +1,4 @@
-const { forkPty } = require('./addon.js')
+const { forkPty } = require('./forkPty.js')
 const { ReadStream } = require('tty')
 const { performance } = require('perf_hooks')
 
