@@ -1,0 +1,20 @@
+{
+  "name": "fork-pty",
+  "version": "0.0.1",
+  "description": "forkpty",
+  "main": "addon.js",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "benchmark": "node addon.benchmark.js",
+    "build": "cd build && make"
+  },
+  "gypfile": true,
+  "type": "module",
+  "dependencies": {
+    "bindings": "^1.5.0"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
+  },
+  "license": "MIT"
+}
