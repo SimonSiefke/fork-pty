@@ -14,6 +14,15 @@ const forkPtyAndExeclp = (file, ...argv) => {
 
 exports.forkPtyAndExeclp = forkPtyAndExeclp
 
+const forkPtyAndExeclpe = (file, ...argv) => {
+  assert(typeof file === 'string')
+  assert(argv.every((arg) => typeof arg === 'string'))
+  const fileDescriptor = addon.forkPtyAndExeclpe(file, ...argv)
+  return fileDescriptor
+}
+
+exports.forkPtyAndExeclpe = forkPtyAndExeclpe
+
 const forkPtyAndExecvp = (file, argv) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
