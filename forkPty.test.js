@@ -1,6 +1,6 @@
-const { forkPty } = require('./forkPty.js')
+const { forkPtyAndExeclp } = require('./forkPty.js')
 
 test('forkPty', () => {
-  const fileDescriptor = forkPty()
+  const fileDescriptor = forkPtyAndExeclp('bash', '-i')
   expect(fileDescriptor).toBeGreaterThan(0)
 })
