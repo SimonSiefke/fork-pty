@@ -4,20 +4,19 @@ const { performance } = require('perf_hooks')
 
 const test1 = async () => {
   const s = performance.now()
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 100; i++) {
     await new Promise((r) => {
-      const fd = forkPtyAndExecvp('bash', ['-i'])
+      const fd = forkPtyAndExecvp('ls', ['-l'])
       const readStream = new ReadStream(fd)
       let j = 0
       readStream.on('data', (data) => {
-        if (++j == 2) {
-          r()
-        }
+        readStream.destroy()
+        r()
       })
     })
   }
   const e = performance.now()
-  console.log({ 'test1: average': (e - s) / 30 })
+  console.log({ 'test1: average': (e - s) / 100 })
 }
 
 // const test2 = async () => {
