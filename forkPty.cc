@@ -18,16 +18,6 @@
 #endif
 
 
-// static int
-// pty_execlpe(const char *file, char **argv, char **envp) {
-//   char **old = environ;
-//   environ = envp;
-//   int ret = execlp(file, argv);
-//   environ = old;
-//   return ret;
-// }
-
-
 char * get_string(napi_env env, napi_value element){
   size_t str_size;
   napi_status status;
@@ -87,128 +77,6 @@ napi_value create_int32(napi_env env, int value){
 
 
 
-int forkpty_and_execlp(napi_env &env, char** array, uint32_t array_length) {
-  int master;
-  pid_t pid = forkpty(&master, NULL, NULL, NULL);
-  if(pid == -1){
-    napi_throw_error(env, nullptr, "forkpty failed");
-  }
-  if(pid == 0){
-    switch (array_length){
-      case 1:
-        execlp(array[0], NULL);
-        break;
-      case 2:
-        execlp(array[0], array[1], NULL);
-        break;
-      case 3:
-        execlp(array[0], array[1], array[2], NULL);
-        break;
-      case 4:
-        execlp(array[0], array[1], array[2], array[3], NULL);
-        break;
-      case 5:
-        execlp(array[0], array[1], array[2], array[3], array[4], NULL);
-        break;
-      case 6:
-        execlp(array[0], array[1], array[2], array[3], array[4], array[5], NULL);
-        break;
-      case 7:
-        execlp(array[0], array[1], array[2], array[3], array[4], array[5], array[6], NULL);
-        break;
-      case 8:
-        execlp(array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[8], NULL);
-        break;
-      case 9:
-        execlp(array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[8], array[9], NULL);
-        break;
-      case 10:
-        execlp(array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[8], array[9], array[10], NULL);
-        break;
-      default:
-        napi_throw_error(env, nullptr, "invalid arguments");
-        break;
-    }
-  }
-  return master;
-}
-
-napi_value ForkPtyAndExeclp(napi_env env, napi_callback_info info) {
-  napi_status status;
-
-  // Get arguments length
-  size_t array_length;
-  status = napi_get_cb_info(env, info, &array_length, NULL, NULL, NULL);
-  assert(status == napi_ok);
-
-  // Get array of arguments
-  napi_value *args = (napi_value *) malloc(array_length * sizeof(uintptr_t));
-  status = napi_get_cb_info(env, info, &array_length, args, NULL, NULL);
-  assert(status == napi_ok);
-
-  // Convert to C array
-  char *array[array_length];
-  for (size_t i = 0; i < array_length; ++i) {
-    array[i] = get_string(env, args[i]);
-  }
-
-  int fd = forkpty_and_execlp(env, array, array_length);
-  return create_int32(env, fd);
-}
-
-int forkpty_and_execlpe(napi_env &env, char** array, uint32_t array_length) {
-  int master;
-  pid_t pid = forkpty(&master, NULL, NULL, NULL);
-  if(pid == -1){
-    napi_throw_error(env, nullptr, "forkpty failed");
-  }
-  char** envp={};
-  if(pid == 0){
-    char **old = environ;
-    environ = envp;
-    switch (array_length){
-      case 1:
-        execlp(array[0], NULL);
-        break;
-      case 2:
-        execlp(array[0], array[1], NULL);
-        break;
-      case 3:
-        execlp(array[0], array[1], array[2], NULL);
-        break;
-      default:
-        napi_throw_error(env, nullptr, "invalid arguments");
-        break;
-    }
-    environ = old;
-  }
-  return master;
-}
-
-napi_value ForkPtyAndExeclpe(napi_env env, napi_callback_info info) {
-  napi_status status;
-
-  // Get arguments length
-  size_t array_length;
-  status = napi_get_cb_info(env, info, &array_length, NULL, NULL, NULL);
-  assert(status == napi_ok);
-
-  // Get array of arguments
-  napi_value *args = (napi_value *) malloc(array_length * sizeof(uintptr_t));
-  status = napi_get_cb_info(env, info, &array_length, args, NULL, NULL);
-  assert(status == napi_ok);
-
-  // Convert to C array
-  char *array[array_length];
-  for (size_t i = 0; i < array_length; ++i) {
-    array[i] = get_string(env, args[i]);
-  }
-
-  int fd = forkpty_and_execlp(env, array, array_length);
-  return create_int32(env, fd);
-}
-
-
 int forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   int master;
   pid_t pid = forkpty(&master, NULL, NULL, NULL);
@@ -245,10 +113,6 @@ napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
   { name, 0, func, 0, 0, 0, napi_default, 0 }
 
 napi_value Init(napi_env env, napi_value exports) {
-  napi_property_descriptor forkPtyAndExeclpDescriptor = DECLARE_NAPI_METHOD("forkPtyAndExeclp", ForkPtyAndExeclp);
-  napi_define_properties(env, exports, 1, &forkPtyAndExeclpDescriptor);
-  napi_property_descriptor forkPtyAndExeclpeDescriptor = DECLARE_NAPI_METHOD("forkPtyAndExeclpe", ForkPtyAndExeclpe);
-  napi_define_properties(env, exports, 1, &forkPtyAndExeclpeDescriptor);
   napi_property_descriptor forkPtyAndExecvpDescriptor = DECLARE_NAPI_METHOD("forkPtyAndExecvp", ForkPtyAndExecvp);
   napi_define_properties(env, exports, 1, &forkPtyAndExecvpDescriptor);
   return exports;
