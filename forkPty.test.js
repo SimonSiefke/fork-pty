@@ -7,7 +7,7 @@ test('spawn bash', () => {
 })
 
 test('spawn ls', async () => {
-  const fd = forkPtyAndExecvp('ls', ['ls'])
+  const fd = forkPtyAndExecvp('ls', ['ls', '.github'])
   const readStream = new ReadStream(fd)
   const data = await new Promise((resolve) => {
     readStream.on('data', (data) => {
@@ -17,9 +17,7 @@ test('spawn ls', async () => {
   })
 
   expect(data).toMatchInlineSnapshot(`
-    "binding.gyp  forkPty.benchmark.js  forkPty.js	    package.json
-    build	     forkPty.cc		   forkPty.test.js  package-lock.json
-    example      forkPty.d.ts	   node_modules
+    "workflows
     "
   `)
 })
