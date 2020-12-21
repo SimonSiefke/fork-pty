@@ -1,7 +1,7 @@
 import { forkPtyAndExecvp } from 'fork-pty'
 import { ReadStream } from 'tty'
 
-const fd = forkPtyAndExecvp('bash', ['bash', '-i'])
+const fd = forkPtyAndExecvp('bash', ['bash', '-c', 'echo hi'])
 
 const readStream = new ReadStream(fd)
 
