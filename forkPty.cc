@@ -48,7 +48,7 @@ uint32_t get_array_length(napi_env env, napi_value value){
 char** get_string_array(napi_env env, napi_value value, uint32_t array_length){
   char **array = (char**) malloc(array_length+1);
   array[array_length] = NULL;
-  for(int i=0;i<array_length;++i){
+  for(u_int32_t i=0;i<array_length;++i){
     napi_value element = get_element(env, value, i);
     char *stringValue = get_string(env, element);
     array[i] = stringValue;
@@ -62,20 +62,11 @@ void free_string(char* string){
 }
 
 void free_string_array(char** array, uint32_t array_length){
-  for(int i=0;i<array_length;++i){
+  for(u_int32_t i=0;i<array_length;++i){
     free_string(array[i]);
   }
   free(array);
 }
-
-napi_value create_int32(napi_env env, int value){
-  napi_status status;
-  napi_value result;
-  status = napi_create_int32(env, value, &result);
-  return result;
-}
-
-
 
 int forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   int master;
@@ -106,7 +97,9 @@ napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
   free_string_array(array, array_length);
   free_string(file);
 
-  return create_int32(env, fd);
+  napi_value result;
+  napi_create_int32(env, fd, &result);
+  return result;
 }
 
 #define DECLARE_NAPI_METHOD(name, func)                                        \
