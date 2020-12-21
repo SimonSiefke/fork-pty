@@ -1,12 +1,13 @@
 {
   "name": "fork-pty",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "forkpty",
   "main": "forkPty.js",
   "files": [
     "binding.gyp",
     "forkPty.cc",
-    "forkPty.js"
+    "forkPty.js",
+    "forkPty.d.ts"
   ],
   "scripts": {
     "build": "cd build && make",

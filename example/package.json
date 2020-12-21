@@ -1,16 +1,14 @@
 {
-  "name": "example",
+  "name": "fork-pty-example",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "fork-pty": "^0.0.5"
+    "fork-pty": "^0.0.7"
   }
 }
