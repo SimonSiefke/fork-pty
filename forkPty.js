@@ -5,8 +5,8 @@ const addon = bindings('forkPty.node')
 const forkPtyAndExecvp = (file, argv) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
-  const fileDescriptor = addon.forkPtyAndExecvp(file, argv)
-  return fileDescriptor
+  const result = addon.forkPtyAndExecvp(file, argv)
+  return result
 }
 
 exports.forkPtyAndExecvp = forkPtyAndExecvp

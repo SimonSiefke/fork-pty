@@ -1,4 +1,4 @@
-const { forkPtyAndExecvp, forkPtyAndExecvp2 } = require('./forkPty.js')
+const { forkPtyAndExecvp } = require('./forkPty.js')
 const { ReadStream } = require('tty')
 const { performance } = require('perf_hooks')
 
@@ -6,7 +6,7 @@ const test1 = async () => {
   const s = performance.now()
   for (let i = 0; i < 100; i++) {
     await new Promise((r) => {
-      const fd = forkPtyAndExecvp('ls', ['-l'])
+      const { fd } = forkPtyAndExecvp('ls', ['-l'])
       const readStream = new ReadStream(fd)
       let j = 0
       readStream.on('data', (data) => {

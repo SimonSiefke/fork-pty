@@ -17,7 +17,7 @@
 #include <pty.h>
 #endif
 
-int forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
+napi_value forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   int master;
   pid_t pid = forkpty(&master, NULL, NULL, NULL);
   if(pid == -1){
@@ -26,7 +26,18 @@ int forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   if(pid == 0){
     execvp(file, argv);
   }
-  return master;
+  // create result object
+  napi_value result;
+  napi_create_object(env, &result);
+  // set result.pid
+  napi_value result_pid;
+  napi_create_int32(env, pid, &result_pid);
+  napi_set_named_property(env, result, "pid", result_pid);
+  // set result.fd
+  napi_value result_fd;
+  napi_create_int32(env, master, &result_fd);
+  napi_set_named_property(env, result, "fd", result_fd);
+  return result;
 }
 
 napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
@@ -56,7 +67,7 @@ napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
     array[i] = stringValue;
   }
 
-  int fd = forkpty_and_execvp(env,file,  array);
+  napi_value result = forkpty_and_execvp(env,file,  array);
 
   // free string array
   for(u_int32_t i=0;i<array_length;++i){
@@ -66,8 +77,6 @@ napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
   // free string
   free(file);
 
-  napi_value result;
-  napi_create_int32(env, fd, &result);
   return result;
 }
 
