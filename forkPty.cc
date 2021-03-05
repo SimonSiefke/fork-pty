@@ -26,6 +26,10 @@ napi_value forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   if(pid == 0){
     execvp(file, argv);
   }
+
+  // SIGCHLD signal to prevent Zombie processes
+  signal(SIGCHLD,SIG_IGN);
+
   // create result object
   napi_value result;
   napi_create_object(env, &result);
