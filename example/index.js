@@ -1,8 +1,8 @@
 import { forkPtyAndExecvp } from '../forkPty.js'
 import { ReadStream } from 'tty'
 
-const { fd } = forkPtyAndExecvp('ls', ['ls', '-l'], () => {
-  console.log('exit callback')
+const { fd } = forkPtyAndExecvp('ls', ['ls', '-l'], (x) => {
+  console.log('exit callback', x)
 })
 
 const readStream = new ReadStream(fd)
