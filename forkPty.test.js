@@ -21,3 +21,38 @@ test('spawn ls', async () => {
     "
   `)
 })
+
+// TODO
+test.skip('valid input', (done) => {
+  const { fd } = forkPtyAndExecvp('ls', ['ls', '.github'])
+  const readStream = new ReadStream(fd)
+  readStream.on('data', (data) => {
+    console.log({ data: data.toString() })
+  })
+  readStream.on('error', (error) => {
+    if (error.code === 'EIO') {
+      return
+    }
+    throw error
+  })
+  readStream.on('close', (had_error) => {
+    expect(had_error).toBe(false)
+    done()
+  })
+})
+
+test('invalid input', (done) => {
+  const { fd } = forkPtyAndExecvp('non-existent-command', [])
+  const readStream = new ReadStream(fd)
+  readStream.on('data', () => {})
+  readStream.on('error', (error) => {
+    if (error.code === 'EIO') {
+      return
+    }
+    throw error
+  })
+  readStream.on('close', (had_error) => {
+    expect(had_error).toBe(true)
+    done()
+  })
+})

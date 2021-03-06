@@ -25,6 +25,8 @@ napi_value forkpty_and_execvp(napi_env &env, char* file,  char* argv[]) {
   }
   if(pid == 0){
     execvp(file, argv);
+    perror("execvp failed");
+    exit(1);
   }
 
   // SIGCHLD signal to prevent Zombie processes
