@@ -21,12 +21,7 @@
 #endif
 
 
-struct ExitCallbackInfo {
-  napi_threadsafe_function cb;
-  napi_env env;
-};
-
-std::map<int, ExitCallbackInfo> map;
+std::map<int, napi_threadsafe_function> map;
 
 
 napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_threadsafe_function cb) {
@@ -41,7 +36,7 @@ napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_thre
     exit(1);
   }
 
-  map[pid] = {cb,env};
+  map[pid] = cb;
 
   // create result object
   napi_value result;
@@ -57,35 +52,14 @@ napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_thre
   return result;
 }
 
-// This function is responsible for converting data coming in from the worker
-// thread to napi_value items that can be passed into JavaScript, and for
-// calling the JavaScript function.
 static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
   printf("calljs called");
-  napi_status status;
   int the_prime = *(int*)data;
-
   if (env != NULL) {
     napi_value undefined, js_the_prime;
-
-    // Convert the integer to a napi_value.
-    status = napi_create_int32(env, the_prime, &js_the_prime);
-    assert(status == napi_ok);
-
-    // Retrieve the JavaScript `undefined` value so we can use it as the `this`
-    // value of the JavaScript function call.
-    status = napi_get_undefined(env, &undefined);
-    assert(status == napi_ok);
-
-    // Call the JavaScript function and pass it the prime that the secondary
-    // thread found.
-    status = napi_call_function(env,
-                              undefined,
-                              js_cb,
-                              1,
-                              &js_the_prime,
-                              NULL);
-    assert(status == napi_ok);
+    napi_create_int32(env, the_prime, &js_the_prime);
+    napi_get_undefined(env, &undefined);
+    napi_call_function(env, undefined, js_cb, 1, &js_the_prime, NULL);
   }
   free(data);
 }
@@ -95,19 +69,9 @@ static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
 void childHandler (int signum) {
   pid_t childpid;
   int childStatus;
-  while ((childpid = waitpid( -1, &childStatus, WNOHANG)) > 0) {
-    printf("child pid %d\n", childpid);
-    ExitCallbackInfo info = map[childpid];
-    napi_threadsafe_function cb = info.cb;
-    napi_status status;
-
-    assert(status == napi_ok);
+  while ((childpid = waitpid(-1, &childStatus, WNOHANG)) > 0) {
     int* the_prime =(int*) malloc(sizeof(*the_prime));
-      *the_prime = 123;
-
-    status = napi_call_threadsafe_function(cb, the_prime, napi_tsfn_blocking);
-    status = napi_release_threadsafe_function(cb, napi_tsfn_release);
-    assert(status == napi_ok);
+      *the_prime = 456;
     if (WIFEXITED(childStatus)) {
       printf("PID %d exited normally.  Exit number:  %d\n", childpid, WEXITSTATUS(childStatus));
     } else if (WIFSTOPPED(childStatus)) {
@@ -117,6 +81,10 @@ void childHandler (int signum) {
     } else {
       perror("waitpid");
     }
+    napi_threadsafe_function cb = map[childpid];
+    map.erase(childpid);
+    napi_call_threadsafe_function(cb, the_prime, napi_tsfn_blocking);
+    napi_release_threadsafe_function(cb, napi_tsfn_release);
   }
 };
 
