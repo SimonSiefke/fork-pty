@@ -41,7 +41,7 @@ test.skip('valid input', (done) => {
   })
 })
 
-test('invalid input', (done) => {
+test.skip('invalid input', (done) => {
   const { fd } = forkPtyAndExecvp('non-existent-command', [])
   const readStream = new ReadStream(fd)
   readStream.on('data', () => {})
