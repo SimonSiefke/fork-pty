@@ -11,10 +11,10 @@ const test1 = async () => {
       const { fd } = forkPtyAndExecvp('ls', ['ls', '-l'], noop)
       const readStream = new ReadStream(fd)
       let j = 0
-      readStream.on('data', (data) => {
-        readStream.destroy()
-        r()
-      })
+      // readStream.on('data', (data) => {
+      //   readStream.destroy()
+      r()
+      // })
     })
   }
   const e = performance.now()

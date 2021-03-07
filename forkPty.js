@@ -6,7 +6,10 @@ const forkPtyAndExecvp = (file, argv, onExit) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
   assert(typeof onExit === 'function')
-  const result = addon.forkPtyAndExecvp(file, argv, onExit)
+  const onExit2 = () => {
+    onExit()
+  }
+  const result = addon.forkPtyAndExecvp(file, argv, onExit2)
   return result
 }
 
