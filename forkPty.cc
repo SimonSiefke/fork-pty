@@ -27,56 +27,20 @@ struct CallbackInfo {
   int child_exit_code;
 };
 
-std::map<int, CallbackInfo> map;
-
-napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_threadsafe_function cb) {
-  int master;
-  pid_t pid = forkpty(&master, NULL, NULL, NULL);
-  if(pid == -1){
-    napi_throw_error(env, NULL, "forkpty failed");
-  }
-  if(pid == 0){
-    execvp(file, argv);
-    perror("execvp failed");
-    exit(1);
-  }
-
-  map[pid] = { cb, childpid:0, child_exit_code:0 };
-
-  // create result object
-  napi_value result, result_pid;
-  napi_status status;
-  status=napi_create_object(env, &result);
-  assert(status==napi_ok);
-  // set result.pid
-  // napi_value result_pid;
-  status=napi_create_int32(env, pid, &result_pid);
-  assert(status==napi_ok);
-  status=napi_set_named_property(env, result, "pid", result_pid);
-  assert(status==napi_ok);
-  // set result.fd
-  napi_value result_fd;
-  status=napi_create_int32(env, master, &result_fd);
-  assert(status==napi_ok);
-  status=napi_set_named_property(env, result, "fd", result_fd);
-  assert(status==napi_ok);
-  return result;
-}
+std::map<int, CallbackInfo*> map;
 
 static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
   CallbackInfo info = *(CallbackInfo*)data;
+  // printf("child id%d\n", info.child_exit_code);
   if (env != NULL) {
-    napi_status status;
     napi_value undefined;
     napi_value js_the_prime;
-    status=napi_create_int32(env, info.childpid, &js_the_prime);
-    assert(status==napi_ok);
-    status=napi_get_undefined(env, &undefined);
-    assert(status==napi_ok);
-    status=napi_call_function(env, undefined, js_cb, 1, &js_the_prime, NULL);
-    assert(status==napi_ok);
+    napi_create_int32(env, info.childpid, &js_the_prime);
+    napi_get_undefined(env, &undefined);
+    napi_call_function(env, undefined, js_cb, 1, &js_the_prime, NULL);
   }
-  // free(data);
+  map.erase(info.childpid);
+  free(data);
 }
 
 //  int the_prime;
@@ -112,22 +76,59 @@ void childHandler (int signum) {
   //   perror("waitpid");
   // }
   // printf("in callback%d\n", childpid);
-  CallbackInfo info = map[childpid];
-  napi_threadsafe_function cb =info.cb;
+  CallbackInfo* info = map[childpid];
+  napi_threadsafe_function cb = info->cb;
+  info->child_exit_code=123;
 
   // if(cb==NULL){
   //   perror("cb cannot be null");
   // }
-  map.erase(childpid);
   napi_status status;
 
-  status = napi_call_threadsafe_function(cb, &info, napi_tsfn_nonblocking);
+  status = napi_call_threadsafe_function(cb, info, napi_tsfn_nonblocking);
   // printf("called function\n");
   assert(status==napi_ok);
   // status=napi_release_threadsafe_function(cb, napi_tsfn_release);
   // assert(status==napi_ok);
   // }
-};
+}
+
+napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_threadsafe_function cb) {
+  int master;
+  pid_t pid = forkpty(&master, NULL, NULL, NULL);
+  if(pid == -1){
+    napi_throw_error(env, NULL, "forkpty failed");
+  }
+  if(pid == 0){
+    execvp(file, argv);
+    perror("execvp failed");
+    exit(1);
+  }
+  CallbackInfo * info = (CallbackInfo *) malloc(sizeof(CallbackInfo));
+  *info = { cb, childpid:pid, child_exit_code:0 };
+  map[pid] = info;
+
+  // create result object
+  napi_value result, result_pid;
+  napi_status status;
+  status=napi_create_object(env, &result);
+  assert(status==napi_ok);
+  // set result.pid
+  // napi_value result_pid;
+  status=napi_create_int32(env, pid, &result_pid);
+  assert(status==napi_ok);
+  status=napi_set_named_property(env, result, "pid", result_pid);
+  assert(status==napi_ok);
+  // set result.fd
+  napi_value result_fd;
+  status=napi_create_int32(env, master, &result_fd);
+  assert(status==napi_ok);
+  status=napi_set_named_property(env, result, "fd", result_fd);
+  assert(status==napi_ok);
+  return result;
+}
+
+
 
 napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
   size_t argc = 3;
