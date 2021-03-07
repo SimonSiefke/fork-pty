@@ -20,7 +20,6 @@
 #include <pty.h>
 #endif
 
-
 struct CallbackInfo {
   napi_threadsafe_function cb;
   pid_t childpid;
@@ -43,28 +42,13 @@ static void CallJs(napi_env env, napi_value js_cb, void* context, void* data) {
   free(data);
 }
 
-//  int the_prime;
-
 // when child exits, call onExit function
 void childHandler (int signum) {
   pid_t childpid;
   int childStatus;
-  // printf("before first wait %d\n", childpid);
   childpid = waitpid(-1, &childStatus, WNOHANG);
   // printf("after first wait %d\n", childpid);
   // while ((childpid = waitpid(-1, &childStatus, WNOHANG)) > 0) {
-  // printf("child done\n");
-  // printf("count%d\n", count);
-  // if(count==0){
-  //   perror("should not happen");
-  //   exit(1);
-  // }
-  // CallbackInfo info = map[childpid];
-  // int* the_prime =(int*) malloc(sizeof(int));
-  // int the_prime = 456;
-  // printf("after malloc %d\n", the_prime);
-  //   *the_prime = 456;
-  // printf("after malloc%d\n", childpid);
   // if (WIFEXITED(childStatus)) {
   //   printf("PID %d exited normally.  Exit number:  %d\n", childpid, WEXITSTATUS(childStatus));
   // } else if (WIFSTOPPED(childStatus)) {
@@ -75,22 +59,10 @@ void childHandler (int signum) {
   //   printf("else");
   //   perror("waitpid");
   // }
-  // printf("in callback%d\n", childpid);
   CallbackInfo* info = map[childpid];
   napi_threadsafe_function cb = info->cb;
   info->child_exit_code=123;
-
-  // if(cb==NULL){
-  //   perror("cb cannot be null");
-  // }
-  napi_status status;
-
-  status = napi_call_threadsafe_function(cb, info, napi_tsfn_nonblocking);
-  // printf("called function\n");
-  assert(status==napi_ok);
-  // status=napi_release_threadsafe_function(cb, napi_tsfn_release);
-  // assert(status==napi_ok);
-  // }
+  napi_call_threadsafe_function(cb, info, napi_tsfn_nonblocking);
 }
 
 napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_threadsafe_function cb) {
@@ -109,69 +81,51 @@ napi_value forkpty_and_execvp(napi_env env, char* file,  char* argv[], napi_thre
   map[pid] = info;
 
   // create result object
-  napi_value result, result_pid;
-  napi_status status;
-  status=napi_create_object(env, &result);
-  assert(status==napi_ok);
+  napi_value result;
+  napi_create_object(env, &result);
   // set result.pid
-  // napi_value result_pid;
-  status=napi_create_int32(env, pid, &result_pid);
-  assert(status==napi_ok);
-  status=napi_set_named_property(env, result, "pid", result_pid);
-  assert(status==napi_ok);
+  napi_value result_pid;
+  napi_create_int32(env, pid, &result_pid);
+  napi_set_named_property(env, result, "pid", result_pid);
   // set result.fd
   napi_value result_fd;
-  status=napi_create_int32(env, master, &result_fd);
-  assert(status==napi_ok);
-  status=napi_set_named_property(env, result, "fd", result_fd);
-  assert(status==napi_ok);
+  napi_create_int32(env, master, &result_fd);
+  napi_set_named_property(env, result, "fd", result_fd);
   return result;
 }
-
-
 
 napi_value ForkPtyAndExecvp(napi_env env, napi_callback_info info) {
   size_t argc = 3;
   napi_value args[3];
-  napi_status status;
-  status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-  assert(status==napi_ok);
+  napi_get_cb_info(env, info, &argc, args, NULL, NULL);
 
   // get string
   size_t str_size;
-  status=napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-  assert(status==napi_ok);
+  napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
   char *file = (char*) malloc(str_size+1);
-  status=napi_get_value_string_utf8(env, args[0], file, str_size+1, &str_size);
-  assert(status==napi_ok);
+  napi_get_value_string_utf8(env, args[0], file, str_size+1, &str_size);
 
   // get array length
   uint32_t array_length;
-  status=napi_get_array_length(env, args[1], &array_length);
-  assert(status==napi_ok);
+  napi_get_array_length(env, args[1], &array_length);
 
   // get string array
   char *array[array_length+1];
   array[array_length] = NULL;
   napi_value element;
   for(u_int32_t i=0; i<array_length; ++i){
-    status=napi_get_element(env, args[1], i, &element);
-    assert(status==napi_ok);
-    status=napi_get_value_string_utf8(env, element, NULL, 0, &str_size);
-    assert(status==napi_ok);
+    napi_get_element(env, args[1], i, &element);
+    napi_get_value_string_utf8(env, element, NULL, 0, &str_size);
     char *stringValue = (char*) malloc(str_size+1);
-    status=napi_get_value_string_utf8(env, element, stringValue, str_size+1, &str_size);
-    assert(status==napi_ok);
+    napi_get_value_string_utf8(env, element, stringValue, str_size+1, &str_size);
     array[i] = stringValue;
   }
 
   // get callback
   napi_threadsafe_function tsfn;
   napi_value work_name;
-  status=napi_create_string_utf8(env, "Node-API Thread-safe Call from Async Work Item", NAPI_AUTO_LENGTH, &work_name);
-  assert(status==napi_ok);
-  status=napi_create_threadsafe_function(env, args[2], NULL, work_name, 0, 1, NULL, NULL, NULL, CallJs, &tsfn);
-  assert(status==napi_ok);
+  napi_create_string_utf8(env, "Node-API Thread-safe Call from Async Work Item", NAPI_AUTO_LENGTH, &work_name);
+  napi_create_threadsafe_function(env, args[2], NULL, work_name, 0, 1, NULL, NULL, NULL, CallJs, &tsfn);
 
   // fork pty
   napi_value result = forkpty_and_execvp(env, file, array, tsfn);
