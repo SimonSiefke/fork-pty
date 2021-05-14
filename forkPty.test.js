@@ -1,8 +1,9 @@
-const { forkPtyAndExecvp } = require('./forkPty.js')
+import { forkPtyAndExecvp } from './forkPty.js'
 
 test('spawn bash', () => {
-  const { fd } = forkPtyAndExecvp('bash', ['bash', '-i'])
+  const { fd, socket } = forkPtyAndExecvp('bash', ['bash', '-i'])
   expect(fd).toBeGreaterThan(0)
+  socket.destroy()
 })
 
 test('spawn ls', async () => {
