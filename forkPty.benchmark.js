@@ -6,11 +6,10 @@ const test1 = async () => {
   const s = performance.now()
   for (let i = 0; i < 100; i++) {
     await new Promise((r) => {
-      const { fd } = forkPtyAndExecvp('ls', ['-l'])
-      const readStream = new ReadStream(fd)
+      const { fd, socket } = forkPtyAndExecvp('ls', ['-l'])
       let j = 0
-      readStream.on('data', (data) => {
-        readStream.destroy()
+      socket.on('data', (data) => {
+        socket.destroy()
         r()
       })
     })
