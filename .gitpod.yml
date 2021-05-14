@@ -1,0 +1,4 @@
+tasks:
+  - before: cd example
+    init: npm ci
+    command: node index.js
