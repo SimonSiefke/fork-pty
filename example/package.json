@@ -9,6 +9,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "fork-pty": "^0.0.13"
+    "fork-pty": "^0.0.14"
   }
 }
