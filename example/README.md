@@ -4,7 +4,7 @@
 
 ```sh
 git clone git@github.com:SimonSiefke/fork-pty.git &&
-cd termterm/example &&
+cd fork-pty/example &&
 npm ci &&
 node index.js
 ```
