@@ -1,6 +1,4 @@
-const { forkPtyAndExecvp } = require('./forkPty.js')
-const { ReadStream } = require('tty')
-const { performance } = require('perf_hooks')
+import { forkPtyAndExecvp } from './forkPty.js'
 
 const test1 = async () => {
   const s = performance.now()
