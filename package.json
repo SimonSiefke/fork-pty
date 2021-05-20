@@ -1,6 +1,6 @@
 {
   "name": "fork-pty",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "forkpty",
   "main": "forkPty.js",
   "type": "module",

@@ -19,10 +19,10 @@ export const forkPtyAndExecvp = (file, argv) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
   const { fd, pid } = addon.forkPtyAndExecvp(file, argv)
-  const socket = new PipeSocket(fd)
+  const ptySocket = new PipeSocket(fd)
   return {
     fd,
     pid,
-    socket,
+    ptySocket,
   }
 }

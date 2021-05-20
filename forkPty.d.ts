@@ -6,5 +6,5 @@ export const forkPtyAndExecvp: (
 ) => {
   readonly fd: number
   readonly pid: number
-  readonly socket: Socket
+  readonly ptySocket: Socket
 }

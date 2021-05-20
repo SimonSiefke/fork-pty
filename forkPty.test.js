@@ -1,16 +1,16 @@
 import { forkPtyAndExecvp } from './forkPty.js'
 
 test('spawn bash', () => {
-  const { fd, socket } = forkPtyAndExecvp('bash', ['bash', '-i'])
+  const { fd, ptySocket } = forkPtyAndExecvp('bash', ['bash', '-i'])
   expect(fd).toBeGreaterThan(0)
-  socket.destroy()
+  ptySocket.destroy()
 })
 
 test('spawn ls', async () => {
-  const { socket } = forkPtyAndExecvp('ls', ['ls', '.github'])
+  const { ptySocket } = forkPtyAndExecvp('ls', ['ls', '.github'])
   const data = await new Promise((resolve) => {
-    socket.on('data', (data) => {
-      socket.destroy()
+    ptySocket.on('data', (data) => {
+      ptySocket.destroy()
       resolve(data.toString())
     })
   })
@@ -23,34 +23,34 @@ test('spawn ls', async () => {
 
 // TODO
 test.skip('valid input', (done) => {
-  const { socket } = forkPtyAndExecvp('ls', ['ls', '.github'])
-  socket.on('data', (data) => {
+  const { ptySocket } = forkPtyAndExecvp('ls', ['ls', '.github'])
+  ptySocket.on('data', (data) => {
     console.log({ data: data.toString() })
   })
-  socket.on('error', (error) => {
+  ptySocket.on('error', (error) => {
     // @ts-ignore
     if (error.code === 'EIO') {
       return
     }
     throw error
   })
-  socket.on('close', (had_error) => {
+  ptySocket.on('close', (had_error) => {
     expect(had_error).toBe(false)
     done()
   })
 })
 
 test.skip('invalid input', (done) => {
-  const { fd, socket } = forkPtyAndExecvp('non-existent-command', [])
-  socket.on('data', () => {})
-  socket.on('error', (error) => {
+  const { fd, ptySocket } = forkPtyAndExecvp('non-existent-command', [])
+  ptySocket.on('data', () => {})
+  ptySocket.on('error', (error) => {
     // @ts-ignore
     if (error.code === 'EIO') {
       return
     }
     throw error
   })
-  socket.on('close', (had_error) => {
+  ptySocket.on('close', (had_error) => {
     expect(had_error).toBe(true)
     done()
   })

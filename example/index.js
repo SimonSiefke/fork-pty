@@ -1,8 +1,8 @@
 import { forkPtyAndExecvp } from 'fork-pty'
 
-const { socket } = forkPtyAndExecvp('bash', ['bash', '-i'])
+const { ptySocket } = forkPtyAndExecvp('bash', ['bash', '-i'])
 
-socket.on('data', (data) => {
+ptySocket.on('data', (data) => {
   console.log({ data: data.toString() })
 })
 
