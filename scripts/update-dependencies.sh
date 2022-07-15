@@ -4,14 +4,14 @@ cd $(dirname "$0")
 cd ..
 
 command_exists(){
-  command -v "$1" &> /dev/null && echo "exists"
+  command -v "$1" &> /dev/null
 }
 
-if [ -z $(command_exists "ncu") ]; then
-  echo "installing npm-check-updates ..."
-  npm i -g npm-check-updates
+if ! command_exists "ncu"; then
+    echo "npm-check-updates is not installed"
+    npm i -g npm-check-updates
 else
-  echo ""
+    echo "ncu is installed"
 fi
 
 function updateDependencies {
@@ -26,7 +26,7 @@ function updateDependencies {
   fi
 }
 
-updateDependencies
+updateDependencies &&
 
 echo "Great Success!"
 
