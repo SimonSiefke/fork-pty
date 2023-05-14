@@ -4,7 +4,7 @@ import { Socket } from 'node:net'
 
 const addon = bindings('forkPty.node')
 
-class PipeSocket extends Socket {
+export class PipeSocket extends Socket {
   constructor(fd) {
     // @ts-ignore
     const pipeWrap = process.binding('pipe_wrap')
@@ -19,10 +19,8 @@ export const forkPtyAndExecvp = (file, argv) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
   const { fd, pid } = addon.forkPtyAndExecvp(file, argv)
-  const ptySocket = new PipeSocket(fd)
   return {
     fd,
     pid,
-    ptySocket,
   }
 }
