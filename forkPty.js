@@ -1,13 +1,29 @@
-const bindings = require('bindings')
-const assert = require('assert')
+import bindings from 'bindings'
+import assert from 'node:assert'
+import { Socket } from 'node:net'
+
 const addon = bindings('forkPty.node')
 
-const forkPtyAndExecvp = (file, argv, onExit) => {
+class PipeSocket extends Socket {
+  constructor(fd) {
+    // @ts-ignore
+    const pipeWrap = process.binding('pipe_wrap')
+    const handle = new pipeWrap.Pipe(pipeWrap.constants.SOCKET)
+    handle.open(fd)
+    // @ts-ignore
+    super({ handle })
+  }
+}
+
+export const forkPtyAndExecvp = (file, argv, onExit) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
   assert(typeof onExit === 'function')
-  const result = addon.forkPtyAndExecvp(file, argv, onExit)
-  return result
+  const { fd, pid } = addon.forkPtyAndExecvp(file, argv, onExit)
+  const ptySocket = new PipeSocket(fd)
+  return {
+    fd,
+    pid,
+    ptySocket,
+  }
 }
-
-exports.forkPtyAndExecvp = forkPtyAndExecvp

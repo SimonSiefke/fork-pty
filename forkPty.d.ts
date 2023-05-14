@@ -1,3 +1,5 @@
+import type { Socket } from 'net'
+
 export const forkPtyAndExecvp: (
   file: string,
   argv: readonly string[],
@@ -5,4 +7,5 @@ export const forkPtyAndExecvp: (
 ) => {
   readonly fd: number
   readonly pid: number
+  readonly ptySocket: Socket
 }
