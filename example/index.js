@@ -5,7 +5,6 @@ const createBash = () => {
   const { fd } = forkPtyAndExecvp('bash', ['bash', '-i'], (x) => {
     console.log('exit callback', x)
   })
-
   console.log({ fd })
   const readStream = new ReadStream(fd)
 

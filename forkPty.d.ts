@@ -7,5 +7,8 @@ export const forkPtyAndExecvp: (
 ) => {
   readonly fd: number
   readonly pid: number
-  readonly ptySocket: Socket
+}
+
+export class PipeSocket extends Socket {
+  constructor(fd: number) {}
 }
