@@ -32,6 +32,15 @@ test('spawn ls', async () => {
   expect(data).toBe(`workflows\r\n`)
 })
 
+test('spawn multiple pseudo terminals', async () => {
+  const chars = ['a', 'b', 'c']
+  const sockets = chars
+    .map((char) => forkPtyAndExecvp('echo', ['echo', char]))
+    .map((result) => result.ptySocket)
+  const data = await Promise.all(sockets.map(waitForData))
+  expect(data).toEqual(['a\r\n', 'b\r\n', 'c\r\n'])
+})
+
 // TODO
 test.skip('valid input', (done) => {
   const { ptySocket } = forkPtyAndExecvp('ls', ['ls', '.github'])
