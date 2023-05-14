@@ -1,6 +1,9 @@
 import { forkPtyAndExecvp } from 'fork-pty'
+import { ReadStream } from 'node:tty'
 
-const { ptySocket } = forkPtyAndExecvp('bash', ['bash', '-i'])
+const { fd } = forkPtyAndExecvp('bash', ['bash', '-i'])
+
+const ptySocket = new ReadStream(fd)
 
 ptySocket.on('data', (data) => {
   console.log({ data: data.toString() })
