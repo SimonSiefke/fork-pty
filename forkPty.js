@@ -15,7 +15,7 @@ class PipeSocket extends Socket {
   }
 }
 
-export const forkPtyAndExecvp = (file, argv, onExit) => {
+export const forkPtyAndExecvp = (file, argv, onExit = () => {}) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
   assert(typeof onExit === 'function')
