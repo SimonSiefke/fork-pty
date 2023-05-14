@@ -4,10 +4,10 @@ const test1 = async () => {
   const s = performance.now()
   for (let i = 0; i < 100; i++) {
     await new Promise((r) => {
-      const { fd, socket } = forkPtyAndExecvp('ls', ['-l'])
+      const { fd, ptySocket } = forkPtyAndExecvp('ls', ['-l'])
       let j = 0
-      socket.on('data', (data) => {
-        socket.destroy()
+      ptySocket.on('data', (data) => {
+        ptySocket.destroy()
         r()
       })
     })
