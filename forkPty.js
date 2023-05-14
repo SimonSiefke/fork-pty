@@ -1,6 +1,6 @@
 import bindings from 'bindings'
-import assert from 'assert'
-import { Socket } from 'net'
+import assert from 'node:assert'
+import { Socket } from 'node:net'
 
 const addon = bindings('forkPty.node')
 
