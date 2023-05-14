@@ -1,24 +1,35 @@
 import { forkPtyAndExecvp } from './forkPty.js'
 
-test('spawn bash', () => {
-  const { fd, ptySocket } = forkPtyAndExecvp('bash', ['bash', '-i'])
-  expect(fd).toBeGreaterThan(0)
-  ptySocket.destroy()
-})
-
-test('spawn ls', async () => {
-  const { ptySocket } = forkPtyAndExecvp('ls', ['ls', '.github'])
+const waitForData = async (ptySocket) => {
   const data = await new Promise((resolve) => {
     ptySocket.on('data', (data) => {
       ptySocket.destroy()
       resolve(data.toString())
     })
   })
+  return data
+}
 
-  expect(data).toMatchInlineSnapshot(`
-    "workflows
-    "
-  `)
+test('spawn bash', () => {
+  const { fd, ptySocket } = forkPtyAndExecvp('bash', ['bash', '-i'])
+  expect(fd).toBeGreaterThan(0)
+  ptySocket.destroy()
+})
+
+test('spawn echo', async () => {
+  const { fd, ptySocket } = forkPtyAndExecvp('echo', [
+    'echo',
+    'Immediate output',
+  ])
+  expect(fd).toBeGreaterThan(0)
+  const data = await waitForData(ptySocket)
+  expect(data).toBe(`Immediate output\r\n`)
+})
+
+test('spawn ls', async () => {
+  const { ptySocket } = forkPtyAndExecvp('ls', ['ls', '.github'])
+  const data = await waitForData(ptySocket)
+  expect(data).toBe(`workflows\r\n`)
 })
 
 // TODO
