@@ -15,10 +15,11 @@ export class PipeSocket extends Socket {
   }
 }
 
-export const forkPtyAndExecvp = (file, argv) => {
+export const forkPtyAndExecvp = (file, argv, onExit = () => {}) => {
   assert(typeof file === 'string')
   assert(Array.isArray(argv) && argv.every((arg) => typeof arg === 'string'))
-  const { fd, pid } = addon.forkPtyAndExecvp(file, argv)
+  assert(typeof onExit === 'function')
+  const { fd, pid } = addon.forkPtyAndExecvp(file, argv, onExit)
   return {
     fd,
     pid,
